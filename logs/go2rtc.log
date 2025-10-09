@@ -1,0 +1,14 @@
+14:53:26.977 INF go2rtc platform=darwin/arm64 revision=34b103b version=1.9.9
+14:53:26.977 INF config path=/Users/karlchow/Desktop/code/frigate-local/config/go2rtc.yaml
+14:53:26.978 ERR [stream] NewStream: Expected string, got <nil>
+14:53:26.978 INF [rtsp] listen addr=:8554
+14:53:26.978 INF [api] listen addr=:1984
+14:53:26.979 INF [webrtc] listen addr=:8555
+15:08:32.996 WRN [rtsp] error="streams: unknown error" stream=camera1
+15:08:42.906 WRN [rtsp] error="streams: unknown error" stream=camera1
+15:08:52.910 WRN [rtsp] error="streams: unknown error" stream=camera1
+15:09:02.917 WRN [rtsp] error="streams: unknown error" stream=camera1
+15:09:12.931 WRN [rtsp] error="streams: unknown error" stream=camera1
+15:09:22.935 WRN [rtsp] error="streams: unknown error" stream=camera1
+15:09:32.943 WRN [rtsp] error="streams: unknown error" stream=camera1
+exit with signal: terminated

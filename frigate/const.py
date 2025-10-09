@@ -1,11 +1,11 @@
 import os
 import re
 
-INSTALL_DIR = "/opt/frigate"
-CONFIG_DIR = "/config"
+INSTALL_DIR = os.environ.get("INSTALL_DIR","/opt/frigate")
+CONFIG_DIR = os.environ.get("CONFIG_DIR", "/config")
 DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
-BASE_DIR = "/media/frigate"
+BASE_DIR = os.environ.get("BASE_DIR", "/media/frigate")
 CLIPS_DIR = f"{BASE_DIR}/clips"
 EXPORT_DIR = f"{BASE_DIR}/exports"
 FACE_DIR = f"{CLIPS_DIR}/faces"

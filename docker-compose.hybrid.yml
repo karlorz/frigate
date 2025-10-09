@@ -1,0 +1,84 @@
+services:
+  frigate-hybrid:
+    container_name: frigate-hybrid
+    # Check host system's actual render/video/plugdev group IDs with 'getent group render', 'getent group video', and 'getent group plugdev'
+    # Must add these exact IDs in container's group_add section or OpenVINO GPU acceleration will fail
+    group_add:
+      - "109" # render
+      - "110" # render
+      - "44"  # video
+      - "46"  # plugdev
+    shm_size: "256mb"
+    image: frigate-hybrid:latest
+    ## Uncomment this block for nvidia gpu support
+    # deploy:
+    #       resources:
+    #           reservations:
+    #               devices:
+    #                   - driver: nvidia
+    #                     count: 1
+    #                     capabilities: [gpu]
+    environment:
+      YOLO_MODELS: ""
+      # Environment variables for host communication
+      FRIGATE_GO2RTC_HOST: "host.docker.internal"
+      FRIGATE_GO2RTC_PORT: "1984"
+    # devices:
+      # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
+      # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+    ports:
+      - "5000:5000"     # Frigate web interface
+      # go2rtc ports are handled by host process
+      # - "1984:1984"   # go2rtc API (commented out - runs on host)
+      # - "8554:8554"   # RTSP (commented out - runs on host)  
+      # - "8555:8555/tcp" # WebRTC TCP (commented out - runs on host)
+      # - "8555:8555/udp" # WebRTC UDP (commented out - runs on host)
+    volumes:
+      - .:/workspace/frigate:cached
+      - ./web/dist:/opt/frigate/web:cached
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+      - ./debug:/media/frigate
+      # Shared volume for go2rtc config communication
+      - ./config/go2rtc.yaml:/dev/shm/go2rtc.yaml:ro
+     # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Enable Docker to reach host services
+    depends_on:
+      - mqtt
+      
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto:2.0
+    command: mosquitto -c /mosquitto-no-auth.conf # enable no-auth mode
+    ports:
+      - "1883:1883"
+
+  # Development container for hybrid setup
+  devcontainer-hybrid:
+    container_name: frigate-devcontainer-hybrid
+    group_add:
+      - "109" # render
+      - "110" # render  
+      - "44"  # video
+      - "46"  # plugdev
+    shm_size: "256mb"
+    build:
+      context: .
+      dockerfile: docker/main/Dockerfile.hybrid
+      target: devcontainer
+    environment:
+      YOLO_MODELS: ""
+      FRIGATE_GO2RTC_HOST: "host.docker.internal"
+      FRIGATE_GO2RTC_PORT: "1984"
+    volumes:
+      - .:/workspace/frigate:cached
+      - ./web/dist:/opt/frigate/web:cached
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+      - ./debug:/media/frigate
+      - ./config/go2rtc.yaml:/dev/shm/go2rtc.yaml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - dev  # Only start with --profile dev

@@ -1,0 +1,23 @@
+default_target: local-hybrid
+
+COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
+VERSION = 0.16.0
+IMAGE_REPO ?= frigate-hybrid
+
+version:
+	echo 'VERSION = "$(VERSION)-$(COMMIT_HASH)"' > frigate/version.py
+
+local-hybrid: version
+	docker buildx build --target=frigate --file docker/main/Dockerfile.hybrid . \
+		--tag frigate-hybrid:latest \
+		--load
+
+run-hybrid: local-hybrid
+	docker run --rm --publish=5000:5000 \
+		--add-host=host.docker.internal:host-gateway \
+		-e FRIGATE_GO2RTC_HOST=host.docker.internal \
+		-e FRIGATE_GO2RTC_PORT=1984 \
+		--volume=${PWD}/config:/config \
+		frigate-hybrid:latest
+
+.PHONY: version local-hybrid run-hybrid
